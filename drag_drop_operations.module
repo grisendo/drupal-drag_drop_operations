@@ -1,0 +1,141 @@
+<?php
+
+/**
+ * Implements hook_views_api().
+ */
+function drag_drop_operations_views_api() {
+
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'drag_drop_operations') . '/views',
+  );
+
+}
+
+function drag_drop_operations_form($form, &$form_state, $view, $display, $entity, $op, $counter = 1, $allowed_values = array(), $element_type = 'select') {
+
+  $drop = drupal_get_library('system', 'ui.droppable');
+
+  $form = array();
+  $form['#tree'] = TRUE;
+  $form['#attached'] = array(
+    'library' => $drop['dependencies'],
+    'js' => $drop['js'],
+    'css' => $drop['css'],
+  );
+  $form['#attached']['js'][] = drupal_get_path('module', 'drag_drop_operations') . '/js/drag_drop_operations.js';
+  $form['view_name'] = array(
+    '#type' => 'value',
+    '#value' => $view,
+  );
+  $form['view_display'] = array(
+    '#type' => 'value',
+    '#value' => $display,
+  );
+  $form['entity'] = array(
+    '#type' => 'value',
+    '#value' => $entity,
+  );
+  $form['operation'] = array(
+    '#type' => 'value',
+    '#value' => $op,
+  );
+  $form['items'] = array();
+  for ($i = 1; $i <= $counter; $i++) {
+    if (isset($_SESSION['ddo_forms:' . $view . ':' . $display]['form_state']['values']['items']['item_' . $i])) {
+      $default = $_SESSION['ddo_forms:' . $view . ':' . $display]['form_state']['values']['items']['item_' . $i];
+    }
+    else {
+      $default = '';
+    }
+    $form['items']['item_' . $i] = array(
+      '#type' => $element_type,
+      '#title' => t('Element !number', array('!number' => $i)),
+      '#options' => $allowed_values,
+      '#default_value' => $default,
+      '#attributes' => array(
+        'class' => array(
+          'ddo-droppable',
+        ),
+      ),
+    );
+  }
+  $form['draft'] = array(
+    '#type' => 'submit',
+    '#value' => t('Draft'),
+    '#submit' => array('drag_drop_operations_form_save_draft'),
+    '#ajax' => array(
+      'callback' => 'drag_drop_operations_form_save_draft',
+    ),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#submit' => array(
+      'drag_drop_operations_form_save_draft',
+      'drag_drop_operations_form_submit',
+    ),
+  );
+  return $form;
+
+}
+
+function drag_drop_operations_form_save_draft($form, $form_state) {
+
+  $_SESSION['ddo_forms:' . $form_state['values']['view_name'] . ':' . $form_state['values']['view_display']] = array(
+    'form' => $form,
+    'form_state' => $form_state,
+  );
+
+}
+
+function drag_drop_operations_form_submit($form, $form_state) {
+
+  $items = $form_state['values']['items'];
+  $rows = array();
+  //$entities = entity_get_info();
+  $entity = $form_state['values']['entity'];
+  //$entity = $entities[$entity]['controller class'];
+  $operation = views_bulk_operations_get_operation(
+    $form_state['values']['operation'],
+    $entity,
+    array()
+  );
+  $rows = array();
+  $current = 1;
+  $total = 0;
+  foreach ($items as $row_index => $entity_id) {
+    //if ($entity_id) {
+      $total++;
+    //}
+  }
+  foreach ($items as $entity_id) {
+    //if ($entity_id) {
+      $base = explode(':', $entity_id);
+      $rows[] = array(
+        'entity_id' => $base[1],
+        'views_row' => array(),
+        // Some operations rely on knowing the position of the current item
+        // in the execution set (because of specific things that need to be done
+        // at the beginning or the end of the set).
+        'position' => array(
+          'current' => $current++,
+          'total' => $total,
+        ),
+      );
+      // Some operations require full selected rows.
+      /*if ($operation->needsRows()) {
+        $rows[$row_index]['views_row'] = $vbo->view->result[$row_index];
+      }*/
+    //}
+  }
+  views_bulk_operations_direct_process(
+    $operation,
+    $rows,
+    array(
+      'revision' => FALSE,
+      'entity_load_capacity' => 10,
+    )
+  );
+
+}
