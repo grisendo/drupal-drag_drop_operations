@@ -40,13 +40,10 @@
               hoverClass: 'ddo-hover',
               drop: function(e, ui) {
                 $placeholder.addClass('ajax-loading');
+                // TO-DO: Style en Vista
                 $that.val('node:52');
                 $('#ddo-edit-container-draft').trigger('mousedown');
-              }/*,
-              out: function(e, ui) {
-                $that.val('');
-                $('#edit-container-draft').trigger('mousedown');
-              }*/
+              }
             }
           );
         }
