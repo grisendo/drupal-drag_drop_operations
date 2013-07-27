@@ -4,5 +4,6 @@ core = 7.x
 package = Views
 dependencies[] = views
 dependencies[] = entity
+dependencies[] = views_bulk_operations
 
 files[] = views/plugins/views_plugin_style_drag_drop_operations_drop.inc

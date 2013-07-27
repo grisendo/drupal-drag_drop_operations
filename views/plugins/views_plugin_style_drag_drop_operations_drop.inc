@@ -12,6 +12,8 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
     $options['cols'] = array('default' => '1');
     $options['element_type'] = array('default' => 'select');
     $options['thumb_disp_mode'] = array('default' => 'full');
+    $options['requires_full'] = array('default' => 0);
+    $options['flush_submit'] = array('default' => 1);
     return $options;
 
   }
@@ -22,6 +24,7 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
     $options = array('' => t('- None -'));
     $field_labels = $this->display->handler->get_field_labels(TRUE);
     $options += $field_labels;
+    // TO-DO 2.x: Remove dependency!
     $operations = views_bulk_operations_get_applicable_operations($this->view->base_table, array());
     $final_ops = array();
     $final_ops[''] = t('- Select an option -');
@@ -70,18 +73,38 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       '#required' => TRUE,
       '#default_value' => $this->options['element_type'],
     );
-    // TO-DO: Ver todos los de la entidad!
+    $entity_info = entity_get_info($this->view->base_table);
+    $entity_modes = $entity_info['view modes'];
+    foreach ($entity_modes as $key => $mode) {
+      $entity_modes[$key] = $mode['label'];
+    }
     $form['thumb_disp_mode'] = array(
       '#type' => 'radios',
       '#title' => t('Thumbnail View mode'),
-      '#options' => array(
-        'full' => t('Full content'),
-        'teaser' => t('Teaser'),
-      ),
+      '#options' => $entity_modes,
       '#required' => TRUE,
       '#default_value' => $this->options['thumb_disp_mode'],
     );
-
+    $form['requires_full'] = array(
+      '#type' => 'radios',
+      '#title' => t('Requires to full all the cells before the action'),
+      '#options' => array(
+        0 => t('No'),
+        1 => t('Yes'),
+      ),
+      '#required' => TRUE,
+      '#default_value' => $this->options['requires_full'],
+    );
+    $form['flush_submit'] = array(
+      '#type' => 'radios',
+      '#title' => t('Empty stored values on submit'),
+      '#options' => array(
+        0 => t('No'),
+        1 => t('Yes'),
+      ),
+      '#required' => TRUE,
+      '#default_value' => $this->options['flush_submit'],
+    );
   }
 
   function render($result) {
@@ -107,7 +130,9 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       $allowed_values,
       $this->options['element_type'],
       $this->options['op_label'],
-      $this->options['thumb_disp_mode']
+      $this->options['thumb_disp_mode'],
+      $this->options['requires_full'],
+      $this->options['flush_submit']
     );
     return render($form);
 

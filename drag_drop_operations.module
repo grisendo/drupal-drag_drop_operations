@@ -12,7 +12,7 @@ function drag_drop_operations_views_api() {
 
 }
 
-function drag_drop_operations_form($form, &$form_state, $view, $display, $entity, $op, $rows = 1, $cols = 1, $allowed_values = array(), $element_type = 'select', $op_label = 'Submit', $view_mode = 'full') {
+function drag_drop_operations_form($form, &$form_state, $view, $display, $entity, $op, $rows = 1, $cols = 1, $allowed_values = array(), $element_type = 'select', $op_label = 'Submit', $view_mode = 'full', $full = 0, $flush = 1) {
 
   $drop = drupal_get_library('system', 'ui.droppable');
 
@@ -33,6 +33,10 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     '#type' => 'value',
     '#value' => $display,
   );
+  $form['requires_full'] = array(
+    '#type' => 'value',
+    '#value' => $full,
+  );
   $form['entity'] = array(
     '#type' => 'value',
     '#value' => $entity,
@@ -44,6 +48,10 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
   $form['container'] = array(
     '#type' => 'container',
     '#id' => 'ddo-' . $view . '-' . $display . '-container',
+  );
+  $form['flush_submit'] = array(
+    '#type' => 'value',
+    '#value' => $flush,
   );
   $form['container']['items'] = array();
   $counter = 1;
@@ -108,7 +116,20 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     ),
     '#id' => 'ddo-edit-container-draft',
   );
-  if ($setted == $total) { // TO-DO: Full as an option!
+
+  if ($full) {
+    if ($setted == $total) {
+      $show_action = TRUE;
+    }
+    else {
+      $show_action = FALSE;
+    }
+  }
+  else {
+    $show_action = TRUE;
+  }
+
+  if ($show_action) {
     $form['container']['submit'] = array(
       '#type' => 'submit',
       '#value' => t($op_label),
@@ -118,6 +139,7 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
       ),
     );
   }
+
   return $form;
 
 }
@@ -146,7 +168,8 @@ function drag_drop_operations_form_submit($form, &$form_state) {
   //$entities = entity_get_info();
   $entity = $form_state['values']['entity'];
   //$entity = $entities[$entity]['controller class'];
-  $operation = views_bulk_operations_get_operation( // TO-DO: Remove dependency!
+  // TO-DO 2.x: Remove dependency!
+  $operation = views_bulk_operations_get_operation(
     $form_state['values']['operation'],
     $entity,
     array()
@@ -155,18 +178,22 @@ function drag_drop_operations_form_submit($form, &$form_state) {
   $current = 1;
   $total = 0;
   foreach ($items as $row_index => $entity_id) {
-    $total++;
+    if ($entity_id) {
+      $total++;
+    }
   }
   foreach ($items as $entity_id) {
-    $base = explode(':', $entity_id);
-    $rows[] = array(
-      'entity_id' => $base[1],
-      'views_row' => array(),
-      'position' => array(
-        'current' => $current++,
-        'total' => $total,
-      ),
-    );
+    if ($entity_id) {
+      $base = explode(':', $entity_id);
+      $rows[] = array(
+        'entity_id' => $base[1],
+        'views_row' => array(),
+        'position' => array(
+          'current' => $current++,
+          'total' => $total,
+        ),
+      );
+    }
   }
   drag_drop_operations_direct_process(
     $operation,
@@ -176,6 +203,9 @@ function drag_drop_operations_form_submit($form, &$form_state) {
       'entity_load_capacity' => 10,
     )
   );
+  if ($form_state['values']['flush_submit']) {
+    unset($_SESSION['ddo_forms:' . $form_state['values']['view_name'] . ':' . $form_state['values']['view_display']]);
+  }
 
 }
 
