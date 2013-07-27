@@ -3,10 +3,19 @@
   Drupal.behaviors.tmpDragDropOperationsDrag = {
 
     attach: function(context, settings) {
-      // TO-DO: Style en Vista
-      $('.views-view-grid td', context).draggable(
-        {
-          helper: 'clone'
+      $('.ddo-draggable:not(processed)', context).each(
+        function() {
+          var $this = $(this);
+          $this.addClass('processed');
+          var $classes = $this.attr('class');
+          var $interest = $classes.match(/ddo-draggable--(.*?)--(\d+)/g)[0].split('--');
+          $this.attr('data-entitytype', $interest[1]);
+          $this.attr('data-entityid', $interest[2]);
+          $this.draggable(
+            {
+              helper: 'clone'
+            }
+          );
         }
       );
     }
@@ -29,6 +38,7 @@
             $remove.bind(
               'click',
               function() {
+                $placeholder.addClass('ddo-ajax-loading');
                 $that.val('');
                 $('#ddo-edit-container-draft').trigger('mousedown');
                 return false;
@@ -39,9 +49,9 @@
             {
               hoverClass: 'ddo-hover',
               drop: function(e, ui) {
-                $placeholder.addClass('ajax-loading');
-                // TO-DO: Style en Vista
-                $that.val('node:52');
+                var $element = $(ui.draggable);
+                $placeholder.addClass('ddo-ajax-loading');
+                $that.val($element.attr('data-entitytype') + ':' + $element.attr('data-entityid'));
                 $('#ddo-edit-container-draft').trigger('mousedown');
               }
             }

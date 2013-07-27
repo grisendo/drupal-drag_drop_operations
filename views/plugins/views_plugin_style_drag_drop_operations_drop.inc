@@ -44,13 +44,6 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       '#required' => TRUE,
       '#default_value' => $this->options['op_label'],
     );
-    $form['label_field'] = array(
-      '#type' => 'select',
-      '#title' => t('Label field'),
-      '#options' => $options,
-      '#required' => TRUE,
-      '#default_value' => $this->options['label_field'],
-    );
     $form['rows'] = array(
       '#type' => 'textfield',
       '#title' => t('Number of rows'),
@@ -62,16 +55,6 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       '#title' => t('Number of cols'),
       '#required' => TRUE,
       '#default_value' => $this->options['cols'],
-    );
-    $form['element_type'] = array(
-      '#type' => 'radios',
-      '#title' => t('Element type'),
-      '#options' => array(
-        'select' => t('Select list'),
-        'radios' => t('Radios'),
-      ),
-      '#required' => TRUE,
-      '#default_value' => $this->options['element_type'],
     );
     $entity_info = entity_get_info($this->view->base_table);
     $entity_modes = $entity_info['view modes'];
@@ -104,6 +87,23 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       ),
       '#required' => TRUE,
       '#default_value' => $this->options['flush_submit'],
+    );
+    $form['label_field'] = array(
+      '#type' => 'select',
+      '#title' => t('Label field (Without JS)'),
+      '#options' => $options,
+      '#required' => TRUE,
+      '#default_value' => $this->options['label_field'],
+    );
+    $form['element_type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Element type (Without JS)'),
+      '#options' => array(
+        'select' => t('Select list'),
+        'radios' => t('Radios'),
+      ),
+      '#required' => TRUE,
+      '#default_value' => $this->options['element_type'],
     );
   }
 

@@ -6,4 +6,5 @@ dependencies[] = views
 dependencies[] = entity
 dependencies[] = views_bulk_operations
 
+files[] = views/plugins/views_plugin_display_extender_drag_drop_operations_drag.inc
 files[] = views/plugins/views_plugin_style_drag_drop_operations_drop.inc

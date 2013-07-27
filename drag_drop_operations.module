@@ -110,6 +110,7 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     '#ajax' => array(
       'callback' => 'drag_drop_operations_form_save_draft_js',
       'wrapper' => 'ddo-' . $view . '-' . $display . '-container',
+      'event' => 'mousedown',
     ),
     '#attributes' => array(
       'class' => array('element-hidden'),
@@ -239,5 +240,74 @@ function drag_drop_operations_direct_process($operation, $rows, $options) {
     }
   }
   $operation->execute($entities_noindex, $operation_context);
+
+}
+
+function drag_drop_operations_is_draggable($vars) {
+
+  return $vars['view']->display_handler->get_option('ddo_draggable');
+
+}
+
+function drag_drop_operations_process_views_view_grid(&$vars) {
+
+  if (drag_drop_operations_is_draggable($vars)) {
+    $entity_id = $vars['view']->base_field;
+    $entity_type = $vars['view']->base_table;
+    $result_index = 0;
+    foreach ($vars['column_classes'] as $keycol => $col) {
+      foreach ($col as $rowindex => $row) {
+        $id = $vars['view']->result[$result_index]->{$entity_id};
+        $classes = 'ddo-draggable ';
+        $classes .= 'ddo-draggable--' . $entity_type . '--' . $id;
+        $vars['column_classes'][$keycol][$rowindex] .= ' ' . $classes;
+        $result_index++;
+      }
+    }
+  }
+
+}
+
+function drag_drop_operations_process_views_view_unformatted(&$vars) {
+
+  if (drag_drop_operations_is_draggable($vars)) {
+    $entity_id = $vars['view']->base_field;
+    $entity_type = $vars['view']->base_table;
+    foreach ($vars['classes_array'] as $index => $row) {
+      $id = $vars['view']->result[$index]->{$entity_id};
+      $classes = 'ddo-draggable ';
+      $classes .= 'ddo-draggable--' . $entity_type . '--' . $id;
+      $vars['classes_array'][$index] .= ' ' . $classes;
+    }
+  }
+
+}
+
+function drag_drop_operations_process_views_view_table(&$vars) {
+
+  if (drag_drop_operations_is_draggable($vars)) {
+    $entity_id = $vars['view']->base_field;
+    $entity_type = $vars['view']->base_table;
+    foreach ($vars['row_classes'] as $index => $row) {
+      $id = $vars['view']->result[$index]->{$entity_id};
+      $vars['row_classes'][$index][]= 'ddo-draggable';
+      $vars['row_classes'][$index][]= 'ddo-draggable--' . $entity_type . '--' . $id;
+    }
+  }
+
+}
+
+function drag_drop_operations_process_views_view_list(&$vars) {
+
+  if (drag_drop_operations_is_draggable($vars)) {
+    $entity_id = $vars['view']->base_field;
+    $entity_type = $vars['view']->base_table;
+    foreach ($vars['classes_array'] as $index => $row) {
+      $id = $vars['view']->result[$index]->{$entity_id};
+      $classes = 'ddo-draggable ';
+      $classes .= 'ddo-draggable--' . $entity_type . '--' . $id;
+      $vars['classes_array'][$index] .= ' ' . $classes;
+    }
+  }
 
 }
