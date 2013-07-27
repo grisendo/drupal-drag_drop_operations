@@ -3,6 +3,12 @@
   Drupal.behaviors.tmpDragDropOperationsDrag = {
 
     attach: function(context, settings) {
+      $('.ddo-draggable-set').draggable(
+        {
+          helper: 'clone'
+        }
+      );
+      // TO-DO: Style en Vista
       $('.views-view-grid td').draggable(
         {
           helper: 'clone'
@@ -21,26 +27,18 @@
           var $this = $(this);
           var $val = $this.val();
           var $that = $this;
-          var $placeholder = $('<div></div>');
-          $placeholder.css(
-            {
-              width: '150px',
-              height: '150px',
-              border: '1px solid #000'
-            }
-          );
-          $this.addClass('ddo-processed');
-          $this.parent().after($placeholder);
+          var $placeholder = $this.parent().next();
           $this.parent().hide();
           $placeholder.droppable(
             {
               hoverClass: 'drop-hover',
               drop: function(e, ui) {
-                var $this = $(this);
+                /*var $this = $(this);
                 var $clone = $(ui.draggable).clone();
                 $clone.removeClass('ui-draggable');
                 $clone.draggable();
-                $this.html($clone);
+                $this.html($clone);*/
+                // TO-DO: Style en Vista
                 $that.val('node:52');
                 $('#edit-draft').trigger('mousedown');
               },
@@ -50,14 +48,6 @@
               }
             }
           );
-          if ($val) {
-            $val = $val.replace(':', '--');
-            console.log($val);
-            $val = $('.ddo--' + $val);
-            if ($val) {
-              $placeholder.html($val.clone());
-            }
-          }
         }
       );
 

@@ -1,8 +1,8 @@
-name = Drag n' drop operations
-description = Drag n' drop operations
+name = Drag and drop operations
+description = Drag and drop operations
 core = 7.x
 package = Views
 dependencies[] = views
+dependencies[] = entity
 
-files[] = views/plugins/views_plugin_display_drag_drop_operations.inc
-files[] = views/plugins/views_plugin_style_drag_drop_operations.inc
+files[] = views/plugins/views_plugin_style_drag_drop_operations_drop.inc
