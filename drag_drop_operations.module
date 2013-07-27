@@ -50,13 +50,13 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
   $setted = 0;
   $total = $rows * $cols;
   for ($i = 1; $i <= $total; $i++) {
-    if (!empty($_SESSION['ddo_forms:' . $view . ':' . $display]['form_state']['values']['items']['item_' . $i])) {
+    if (!empty($_SESSION['ddo_forms:' . $view . ':' . $display]['form_state']['values']['container']['items']['item_' . $i])) {
       $setted++;
-      $default = $_SESSION['ddo_forms:' . $view . ':' . $display]['form_state']['values']['items']['item_' . $i];
+      $default = $_SESSION['ddo_forms:' . $view . ':' . $display]['form_state']['values']['container']['items']['item_' . $i];
     }
     else {
       $default = '';
-    }
+    }    
     $form['container']['items']['item_' . $i] = array(
       '#type' => $element_type,
       '#title' => t('Element !number', array('!number' => $i)),
@@ -75,6 +75,7 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
         '#type' => 'markup',
         '#markup' => '<div class="ddo-droppable-box">' .
             '<div class="ddo-draggable-set">' .
+              '<a href="#" class="ddo-remove-item">' . t('Remove') . '</a>' .
               render(entity_view($base[0], $ent_ent, $view_mode)) .
             '</div>' .
           '</div>'
@@ -100,11 +101,12 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     '#submit' => array('drag_drop_operations_form_save_draft'),
     '#ajax' => array(
       'callback' => 'drag_drop_operations_form_save_draft_js',
-      'wrapper' => 'drag-drop-operations-form', //'ddo-' . $view . '-' . $display . '-container'
+      'wrapper' => 'ddo-' . $view . '-' . $display . '-container',
     ),
     '#attributes' => array(
       'class' => array('element-hidden'),
     ),
+    '#id' => 'ddo-edit-container-draft',
   );
   if ($setted == $total) { // TO-DO: Si lleno! Opción
     $form['container']['submit'] = array(

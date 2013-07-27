@@ -3,13 +3,8 @@
   Drupal.behaviors.tmpDragDropOperationsDrag = {
 
     attach: function(context, settings) {
-      $('.ddo-draggable-set').draggable(
-        {
-          helper: 'clone'
-        }
-      );
       // TO-DO: Style en Vista
-      $('.views-view-grid td').draggable(
+      $('.views-view-grid td', context).draggable(
         {
           helper: 'clone'
         }
@@ -29,23 +24,29 @@
           var $that = $this;
           var $placeholder = $this.parent().next();
           $this.parent().hide();
+          var $remove = $placeholder.find('.ddo-remove-item');
+          if ($remove.length) {
+            $remove.bind(
+              'click',
+              function() {
+                $that.val('');
+                $('#ddo-edit-container-draft').trigger('mousedown');
+                return false;
+              }
+            );
+          }
           $placeholder.droppable(
             {
-              hoverClass: 'drop-hover',
+              hoverClass: 'ddo-hover',
               drop: function(e, ui) {
-                /*var $this = $(this);
-                var $clone = $(ui.draggable).clone();
-                $clone.removeClass('ui-draggable');
-                $clone.draggable();
-                $this.html($clone);*/
-                // TO-DO: Style en Vista
+                $placeholder.addClass('ajax-loading');
                 $that.val('node:52');
-                $('#edit-draft').trigger('mousedown');
-              },
+                $('#ddo-edit-container-draft').trigger('mousedown');
+              }/*,
               out: function(e, ui) {
                 $that.val('');
-                $('#edit-draft').trigger('mousedown');
-              }
+                $('#edit-container-draft').trigger('mousedown');
+              }*/
             }
           );
         }
