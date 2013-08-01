@@ -3,10 +3,10 @@
   Drupal.behaviors.tmpDragDropOperationsDrag = {
 
     attach: function(context, settings) {
-      $('.ddo-draggable:not(processed)', context).each(
+      $('.ddo-draggable:not(.ddo-drag-processed)', context).each(
         function() {
           var $this = $(this);
-          $this.addClass('processed');
+          $this.addClass('ddo-drag-processed');
           var $classes = $this.attr('class');
           var $interest = $classes.match(/ddo-draggable--(.*?)--(\d+)/g)[0].split('--');
           $this.attr('data-entitytype', $interest[1]);
@@ -26,9 +26,12 @@
 
     attach: function(context, settings) {
 
-      $('.ddo-droppable:not(.ddo-processed)', context).each(
+      $('#ddo-edit-container-draft:not(.element-hidden)', context).addClass('element-hidden');
+
+      $('.ddo-droppable:not(.ddo-drop-processed)', context).each(
         function() {
           var $this = $(this);
+          $this.addClass('ddo-drop-processed');
           var $val = $this.val();
           var $that = $this;
           var $placeholder = $this.parent().next();

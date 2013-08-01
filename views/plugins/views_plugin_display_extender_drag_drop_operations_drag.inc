@@ -50,7 +50,7 @@ class views_plugin_display_extender_drag_drop_operations_drag extends views_plug
    * categorizes the fields under the 'Other' category.
    */
   function options_summary(&$categories, &$options) {
-    $ddo = check_plain(trim($this->display->get_option('ddo_draggable')));
+    $ddo = $this->display->get_option('ddo_draggable');
     if ($ddo) {
       $ddo = t('Yes');
     }

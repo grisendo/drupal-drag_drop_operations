@@ -12,7 +12,7 @@ function drag_drop_operations_views_api() {
 
 }
 
-function drag_drop_operations_form($form, &$form_state, $view, $display, $entity, $op, $rows = 1, $cols = 1, $allowed_values = array(), $element_type = 'select', $op_label = 'Submit', $view_mode = 'full', $full = 0, $flush = 1) {
+function drag_drop_operations_form($form, &$form_state, $view, $display, $entity, $op, $rows = 1, $cols = 1, $allowed_values = array(), $element_type = 'select', $op_label = 'Submit', $view_mode = 'full', $full = 0, $flush = 1, $redraggable = 0) {
 
   $drop = drupal_get_library('system', 'ui.droppable');
 
@@ -82,7 +82,7 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
       $form['container']['items']['val_' . $i] = array(
         '#type' => 'markup',
         '#markup' => '<div class="ddo-droppable-box">' .
-            '<div class="ddo-draggable-set">' .
+            '<div class="ddo-draggable-set' . ($redraggable ? ' ddo-draggable ddo-draggable--' . $base[0] . '--' . $base[1] : '') . '">' .
               '<a href="#" class="ddo-remove-item">' . t('Remove') . '</a>' .
               render(entity_view($base[0], $ent_ent, $view_mode)) .
             '</div>' .
@@ -112,9 +112,6 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
       'wrapper' => 'ddo-' . $view . '-' . $display . '-container',
       'event' => 'mousedown',
     ),
-    '#attributes' => array(
-      'class' => array('element-hidden'),
-    ),
     '#id' => 'ddo-edit-container-draft',
   );
 
@@ -136,7 +133,10 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
       '#value' => t($op_label),
       '#submit' => array(
         'drag_drop_operations_form_save_draft',
-        'drag_drop_operations_form_submit',
+        'drag_drop_operations_form_submit_all',
+      ),
+      '#validate' => array(
+        'drag_drop_operations_form_validate_all',
       ),
     );
   }
@@ -162,7 +162,19 @@ function drag_drop_operations_form_save_draft($form, &$form_state) {
 
 }
 
-function drag_drop_operations_form_submit($form, &$form_state) {
+function drag_drop_operations_form_validate_all($form, &$form_state) {
+
+  if ($form_state['values']['requires_full']) {
+    foreach ($form_state['values']['container']['items'] as $d => $item) {
+      if (!$item) {
+        form_set_error('container][items][' . $d, t('Item is required'));
+      }
+    }
+  }
+
+}
+
+function drag_drop_operations_form_submit_all($form, &$form_state) {
 
   $items = $form_state['values']['container']['items'];
   $rows = array();
@@ -196,6 +208,9 @@ function drag_drop_operations_form_submit($form, &$form_state) {
       );
     }
   }
+  if ($form_state['values']['flush_submit']) {
+    $_SESSION['ddo_forms:' . $form_state['values']['view_name'] . ':' . $form_state['values']['view_display']] = array();
+  }
   drag_drop_operations_direct_process(
     $operation,
     $rows,
@@ -204,9 +219,7 @@ function drag_drop_operations_form_submit($form, &$form_state) {
       'entity_load_capacity' => 10,
     )
   );
-  if ($form_state['values']['flush_submit']) {
-    unset($_SESSION['ddo_forms:' . $form_state['values']['view_name'] . ':' . $form_state['values']['view_display']]);
-  }
+  drupal_goto($_GET['q']);
 
 }
 

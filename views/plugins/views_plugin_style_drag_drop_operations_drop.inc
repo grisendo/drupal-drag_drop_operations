@@ -132,7 +132,8 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       $this->options['op_label'],
       $this->options['thumb_disp_mode'],
       $this->options['requires_full'],
-      $this->options['flush_submit']
+      $this->options['flush_submit'],
+      $this->view->display_handler->get_option('ddo_draggable')
     );
     return render($form);
 
