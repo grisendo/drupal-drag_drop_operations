@@ -28,7 +28,7 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
 
   }
 
-  function options_form(&$form, &$form_state) {
+  public function options_form(&$form, &$form_state) {
 
     parent::options_form($form, $form_state);
     $options = array('' => t('- None -'));

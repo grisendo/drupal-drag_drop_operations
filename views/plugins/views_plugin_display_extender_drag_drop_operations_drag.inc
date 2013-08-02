@@ -24,7 +24,9 @@ class views_plugin_display_extender_drag_drop_operations_drag extends views_plug
    * Provide the form to set new option.
    */
   public function options_form(&$form, &$form_state) {
+
     switch ($form_state['section']) {
+
       case 'ddo_draggable':
         $form['#title'] .= t('Drag and Drop operations: Draggable');
         $form['ddo_draggable'] = array(
@@ -36,9 +38,12 @@ class views_plugin_display_extender_drag_drop_operations_drag extends views_plug
           '#default_value' => $this->options['ddo_draggable'],
         );
         break;
+
       default:
         break;
+
     }
+
   }
 
   /**
@@ -50,7 +55,7 @@ class views_plugin_display_extender_drag_drop_operations_drag extends views_plug
       case 'ddo_draggable':
         $this->display->set_option('ddo_draggable', $ddo);
         break;
-    } 
+    }
   }
 
   /**

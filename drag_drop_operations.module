@@ -81,7 +81,8 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
       $ent_ent = entity_load($base[0], array($base[1]));
       $form['container']['items']['val_' . $i] = array(
         '#type' => 'markup',
-        '#markup' => '<div class="ddo-droppable-box">' .
+        '#markup' =>
+          '<div class="ddo-droppable-box">' .
             '<div class="ddo-draggable-set' . ($redraggable ? ' ddo-draggable ddo-draggable--' . $base[0] . '--' . $base[1] : '') . '">' .
               '<a href="#" class="ddo-remove-item">' . t('Remove') . '</a>' .
               render(entity_view($base[0], $ent_ent, $view_mode)) .
