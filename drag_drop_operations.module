@@ -64,7 +64,7 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     }
     else {
       $default = '';
-    }    
+    }
     $form['container']['items']['item_' . $i] = array(
       '#type' => $element_type,
       '#title' => t('Element !number', array('!number' => $i)),
@@ -85,8 +85,8 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
             '<div class="ddo-draggable-set' . ($redraggable ? ' ddo-draggable ddo-draggable--' . $base[0] . '--' . $base[1] : '') . '">' .
               '<a href="#" class="ddo-remove-item">' . t('Remove') . '</a>' .
               render(entity_view($base[0], $ent_ent, $view_mode)) .
-            '</div>' .
-          '</div>'
+            '</div>
+          </div>',
       );
     }
     else {
@@ -128,9 +128,10 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
   }
 
   if ($show_action) {
+    $t = get_t();
     $form['container']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t($op_label),
+      '#value' => $t($op_label),
       '#submit' => array(
         'drag_drop_operations_form_save_draft',
         'drag_drop_operations_form_submit_all',
@@ -178,9 +179,7 @@ function drag_drop_operations_form_submit_all($form, &$form_state) {
 
   $items = $form_state['values']['container']['items'];
   $rows = array();
-  //$entities = entity_get_info();
   $entity = $form_state['values']['entity'];
-  //$entity = $entities[$entity]['controller class'];
   // TO-DO 2.x: Remove dependency!
   $operation = views_bulk_operations_get_operation(
     $form_state['values']['operation'],
@@ -247,9 +246,9 @@ function drag_drop_operations_direct_process($operation, $rows, $options) {
     }
   }
   $entities_noindex = array();
-  foreach($rows as $row_item) {
+  foreach ($rows as $row_item) {
     if (isset($entities[$row_item['entity_id']])) {
-      $entities_noindex[]= $entities[$row_item['entity_id']];
+      $entities_noindex[] = $entities[$row_item['entity_id']];
     }
   }
   $operation->execute($entities_noindex, $operation_context);
@@ -303,8 +302,8 @@ function drag_drop_operations_process_views_view_table(&$vars) {
     $entity_type = $vars['view']->base_table;
     foreach ($vars['row_classes'] as $index => $row) {
       $id = $vars['view']->result[$index]->{$entity_id};
-      $vars['row_classes'][$index][]= 'ddo-draggable';
-      $vars['row_classes'][$index][]= 'ddo-draggable--' . $entity_type . '--' . $id;
+      $vars['row_classes'][$index][] = 'ddo-draggable';
+      $vars['row_classes'][$index][] = 'ddo-draggable--' . $entity_type . '--' . $id;
     }
   }
 

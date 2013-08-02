@@ -1,15 +1,11 @@
 .ddo-droppable-box {
-
   float: left;
   width: 150px;
   height: 150px;
   border: 1px solid #000;
   overflow: hidden;
-
 }
 
 .ddo-cleaner {
-
   clear: both;
-
 }

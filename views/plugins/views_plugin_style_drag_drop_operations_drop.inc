@@ -1,8 +1,18 @@
 <?php
 
+/**
+ * @file
+ * Contains the option plugin to generate views droppable items.
+ */
+
+/**
+ * The style plugin class to generate views droppable items.
+ *
+ * @ingroup views_style_plugins
+ */
 class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
 
-  function option_definition() {
+  public function option_definition() {
 
     $options = parent::option_definition();
     $options['operation'] = array('default' => '');
@@ -107,7 +117,7 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
     );
   }
 
-  function render($result) {
+  public function render($result) {
 
     $id = $this->view->base_field;
     $entity = $this->view->base_table;
@@ -115,8 +125,8 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
     $allowed_values = array();
     $allowed_values[''] = t('- Select an option -');
     foreach ($this->view->result as $row_index => $row) {
-      $allowed_values[$entity . ':' . $row->{$id}] =
-        $this->view->field[$this->options['label_field']]->theme($row);
+      $allowed_values[$entity . ':' . $row->{$id}]
+        = $this->view->field[$this->options['label_field']]->theme($row);
     }
 
     $form = drupal_get_form(
