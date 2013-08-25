@@ -9,3 +9,8 @@
 .ddo-cleaner {
   clear: both;
 }
+
+.ddo-draggable {
+  cursor: move;
+}
+
