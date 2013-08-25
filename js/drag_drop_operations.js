@@ -1,6 +1,6 @@
 (function($) {
 
-  Drupal.behaviors.tmpDragDropOperationsDrag = {
+  Drupal.behaviors.dragDropOperationsDrag = {
 
     attach: function(context, settings) {
       $('.ddo-draggable:not(.ddo-drag-processed)', context).each(
@@ -30,7 +30,7 @@
 
     attach: function(context, settings) {
 
-      $('#ddo-edit-container-draft:not(.element-hidden)', context).hide();
+      $('#ddo-edit-container-draft:not(.element-hidden)', context).addClass('element-hidden').hide();
 
       $('.ddo-droppable:not(.ddo-drop-processed)', context).each(
         function() {

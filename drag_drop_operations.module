@@ -1,6 +1,21 @@
 <?php
 
 /**
+ * Implements hook_menu().
+ */
+function drag_drop_operations_menu() {
+  $items = array();
+  $items['ddo-add-link/%/%/%/%'] = array(
+    'title' => 'Drag drop operations add link callback',
+    'page callback' => 'drag_drop_operations_add_link_callback',
+    'page arguments' => array(1, 2, 3, 4),
+    'access arguments' => array('access content'),
+    'delivery callback' => 'ajax_deliver',
+  );
+  return $items;
+}
+
+/**
  * Implements hook_views_api().
  */
 function drag_drop_operations_views_api() {
@@ -8,6 +23,114 @@ function drag_drop_operations_views_api() {
   return array(
     'api' => '3.0',
     'path' => drupal_get_path('module', 'drag_drop_operations') . '/views',
+  );
+
+}
+
+/**
+ * Implements hook_ds_fields_info().
+ */
+function drag_drop_operations_ds_fields_info($entity_type) {
+
+  $fields = array();
+
+  $sql = db_select('views_display', 'vd')
+    ->fields('vd', array('vid', 'id', 'display_title'))
+    ->fields('vv', array('name', 'human_name'))
+    ->condition(
+      'vd.display_options',
+      '%s:12:"style_plugin";s:44:"views_plugin_style_drag_drop_operations_drop"%',
+      'LIKE'
+    )
+    ->condition('vv.base_table', $entity_type);
+  $sql->leftJoin('views_view', 'vv', 'vd.vid = vv.vid');
+  $sql = $sql->execute();
+
+  $entity_key = NULL;
+
+  while ($row = $sql->fetchAssoc()) {
+    if (!$entity_key) {
+      $entity_info = entity_get_info($entity_type);
+      $entity_key = $entity_info['entity keys']['id'];
+    }
+    $fields[$entity_type]['ddo__' . $row['name'] . '__' . $row['id']] = array(
+      'title' => t(
+        'Drag and drop link: @view (@display)',
+        array(
+          '@view' => $row['human_name'],
+          '@display' => $row['display_title'],
+        )
+      ),
+      'field_type' => DS_FIELD_TYPE_FUNCTION,
+      'function' => 'drag_drop_operations_add_link',
+      'properties' => array(
+        'settings' => array(
+          'text' => array(
+            'type' => 'textfield',
+          ),
+        ),
+        'default' => array(
+          'text' => 'Add',
+        ),
+        'ddo' => array(
+          'view' => $row['name'],
+          'display' => $row['id'],
+          'subpath' => $row['name'] . '/' . $row['id'],
+          'entity_key' => $entity_key,
+        ),
+      ),
+    );
+  }
+
+  if (isset($fields[$entity_type])) {
+    return array($entity_type => $fields[$entity_type]);
+  }
+
+  return;
+
+}
+
+function drag_drop_operations_add_link_callback($entity_type, $entity_id, $view, $display) {
+  $commands = array();
+  $token = 'ddo-add-link/' . $entity_type . '/' . $entity_id . '/' . $view . '/' . $display . '/nojs';
+  if (isset($_GET['token']) && drupal_valid_token($_GET['token'], $token)) {
+    $commands[] = array(
+      'command' => 'ddo_link_add',
+      'entity' => $entity_type,
+      'id' => $entity_id,
+      'view' => $view,
+      'display' => $display,
+    );
+  }
+  else {
+    $commands[] = ajax_command_alert(t('Invalid token'));
+  }
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+function drag_drop_operations_add_link($field) {
+
+  $path = 'ddo-add-link/' . $field['entity_type'] . '/';
+  $path .= $field['entity']->{$field['properties']['ddo']['entity_key']} . '/';
+  $path .= $field['properties']['ddo']['subpath'] . '/nojs';
+  drupal_add_js(drupal_get_path('module', 'drag_drop_operations') . '/js/drag_drop_operations_link.js');
+  return l(
+    t('Add'),
+    $path,
+    array(
+      'query' => array(
+        'token' => drupal_get_token($path),
+      ),
+      'attributes' => array(
+        'class' => array(
+          'ddo-add-link',
+          'use-ajax',
+        ),
+      ),
+    )
   );
 
 }
