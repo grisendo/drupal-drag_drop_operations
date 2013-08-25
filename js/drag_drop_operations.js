@@ -14,6 +14,7 @@
           $this.draggable(
             {
               helper: 'clone',
+              cancel: '.ddo-add-link',
               start: function(event, ui) {
                 var $this = $(ui.helper);
                 $this.addClass('ddo-dragging');
