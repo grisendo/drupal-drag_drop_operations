@@ -26,7 +26,7 @@
 
     attach: function(context, settings) {
 
-      $('#ddo-edit-container-draft:not(.element-hidden)', context).addClass('element-hidden');
+      $('#ddo-edit-container-draft:not(.element-hidden)', context).hide();
 
       $('.ddo-droppable:not(.ddo-drop-processed)', context).each(
         function() {
