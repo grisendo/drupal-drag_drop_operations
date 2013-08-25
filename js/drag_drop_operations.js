@@ -13,7 +13,11 @@
           $this.attr('data-entityid', $interest[2]);
           $this.draggable(
             {
-              helper: 'clone'
+              helper: 'clone',
+              start: function(event, ui) {
+                var $this = $(ui.helper);
+                $this.addClass('ddo-dragging');
+              }
             }
           );
         }
