@@ -177,6 +177,14 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     '#value' => $flush,
   );
   $form['container']['items'] = array();
+  if (!empty($_SESSION['ddo_forms:' . $view . ':' . $display]['id'])) {
+    $form['#build_id'] = $_SESSION['ddo_forms:' . $view . ':' . $display]['id'];
+  }
+  else {
+    $form_build_id = 'form-' . drupal_hash_base64(uniqid(mt_rand(), TRUE) . mt_rand());
+    $_SESSION['ddo_forms:' . $view . ':' . $display]['id'] = $form_build_id;
+    $form['#build_id'] = $form_build_id;
+  }
   $counter = 1;
   $setted = 0;
   $total = $rows * $cols;
@@ -273,6 +281,7 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
 function drag_drop_operations_form_save_draft_js($form, &$form_state) {
 
   $_SESSION['ddo_forms:' . $form_state['values']['view_name'] . ':' . $form_state['values']['view_display']] = array(
+    'id' => $form['#build_id'],
     'form' => $form,
     'form_state' => $form_state,
   );
