@@ -20,6 +20,8 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
     $options['label_field'] = array('default' => '');
     $options['rows'] = array('default' => '1');
     $options['cols'] = array('default' => '1');
+    $options['required_size'] = array('default' => '0');
+    $options['required_size_form'] = array('default' => 'select');
     $options['element_type'] = array('default' => 'select');
     $options['thumb_disp_mode'] = array('default' => 'full');
     $options['requires_full'] = array('default' => 0);
@@ -65,6 +67,26 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       '#title' => t('Number of cols'),
       '#required' => TRUE,
       '#default_value' => $this->options['cols'],
+    );
+    $form['required_size'] = array(
+      '#type' => 'radios',
+      '#title' => t('Require size selection'),
+      '#options' => array(
+        0 => t('No'),
+        1 => t('Yes'),
+      ),
+      '#required' => TRUE,
+      '#default_value' => $this->options['required_size'],
+    );
+    $form['required_size_form'] = array(
+      '#type' => 'radios',
+      '#title' => t('Required size element form'),
+      '#options' => array(
+        'select' => t('Select list'),
+        'radios' => t('Radios'),
+      ),
+      '#required' => TRUE,
+      '#default_value' => $this->options['required_size_form'],
     );
     $entity_info = entity_get_info($this->view->base_table);
     $entity_modes = $entity_info['view modes'];
@@ -129,21 +151,27 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
         = $this->view->field[$this->options['label_field']]->theme($row);
     }
 
+    // TO-DO: Sortable?
+
     $form = drupal_get_form(
       'drag_drop_operations_form',
-      $this->view->name,
-      $this->view->current_display,
-      $entity,
-      $this->options['operation'],
-      $this->options['rows'],
-      $this->options['cols'],
-      $allowed_values,
-      $this->options['element_type'],
-      $this->options['op_label'],
-      $this->options['thumb_disp_mode'],
-      $this->options['requires_full'],
-      $this->options['flush_submit'],
-      $this->view->display_handler->get_option('ddo_draggable')
+      array(
+        'view' => $this->view->name,
+        'display' => $this->view->current_display,
+        'entity' => $entity,
+        'op' => $this->options['operation'],
+        'rows' => $this->options['rows'],
+        'cols' => $this->options['cols'],
+        'allowed_values' => $allowed_values,
+        'element_type' => $this->options['element_type'],
+        'op_label' => $this->options['op_label'],
+        'view_mode' => $this->options['thumb_disp_mode'],
+        'full' => $this->options['requires_full'],
+        'flush' => $this->options['flush_submit'],
+        'required_size' => $this->options['required_size'],
+        'required_size_form' => $this->options['required_size_form'],
+        'redraggable' => $this->view->display_handler->get_option('ddo_draggable'),
+      )
     );
     return render($form);
 

@@ -135,7 +135,26 @@ function drag_drop_operations_add_link($field) {
 
 }
 
-function drag_drop_operations_form($form, &$form_state, $view, $display, $entity, $op, $rows = 1, $cols = 1, $allowed_values = array(), $element_type = 'select', $op_label = 'Submit', $view_mode = 'full', $full = 0, $flush = 1, $redraggable = 0) {
+function drag_drop_operations_form($form, &$form_state, $options) {
+
+  $view = $options['view'];
+  $display = $options['display'];
+  $entity = $options['entity'];
+  $op = $options['op'];
+  $rows = isset($options['rows']) ? $options['rows'] : 1;
+  $cols = isset($options['cols']) ? $options['cols'] : 1;
+  $required_size = isset($options['required_size']) ? $options['required_size'] : 0;
+  $required_size_form = $options['required_size_form'];
+  $allowed_values = isset($options['allowed_values']) ? $options['allowed_values'] : array();
+  $element_type = isset($options['element_type']) ? $options['element_type'] : 'select';
+  $op_label = isset($options['op_label']) ? $options['op_label'] : 'Submit';
+  $view_mode = isset($options['view_mode']) ? $options['view_mode'] : 'full';
+  $full = isset($options['full']) ? $options['full'] : 0;
+  $flush = isset($options['flush']) ? $options['flush'] : 1;
+  $redraggable = isset($options['redraggable']) ? $options['redraggable'] : 0;
+
+  $rows = array_filter(explode(',', $rows), 'trim');
+  $cols = array_filter(explode(',', $cols), 'trim');
 
   $drop = drupal_get_library('system', 'ui.droppable');
 
@@ -172,6 +191,60 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     '#type' => 'container',
     '#id' => 'ddo-' . $view . '-' . $display . '-container',
   );
+  if ((count($rows) > 1) && (count($cols) > 1)) {
+    $array_rows = $rows;
+    $array_cols = $cols;
+    $first_step = FALSE;
+    if (!empty($_SESSION['ddo_forms:' . $view . ':' . $display]['rows'])) {
+      $rows = $_SESSION['ddo_forms:' . $view . ':' . $display]['rows'];
+      $cols = $_SESSION['ddo_forms:' . $view . ':' . $display]['cols'];
+    }
+    elseif ($required_size) {
+      $first_step = TRUE;
+      $rows = 0;
+      $cols = 0;
+    }
+    else {
+      $rows = $rows[0];
+      $cols = $cols[0];
+    }
+    $size_options = array();
+    if ($first_step) {
+      $size_options['0_0'] = t('- Select an option - ');
+    }
+    $first_set = FALSE;
+    foreach ($array_rows as $index => $row) {
+      $size_options[$row . '_' . $array_cols[$index]] = $row . 'x' . $array_cols[$index];
+      if (!$first_set) {
+        $first_set = $size_options[$row . '_' . $array_cols[$index]];
+      }
+    }
+    $form['container']['box_size'] = array(
+      '#type' => $required_size_form,
+      '#options' => $size_options,
+      '#default_value' => isset($size_options[$rows . '_' . $cols]) ? $size_options[$rows . '_' . $cols] : $first_set,
+      '#options' => $size_options,
+      '#title' => t('Size'),
+      '#ajax' => array(
+        'callback' => 'drag_drop_operations_form_save_draft_js',
+        'wrapper' => 'ddo-' . $view . '-' . $display . '-container',
+        'event' => 'change',
+      ),
+    );
+  }
+  else {
+    $rows = $rows[0];
+    $cols = $cols[0];
+  }
+  $total = $rows * $cols;
+  $form['container']['#attributes'] = array(
+    'classes' => array(
+      'ddo-grid-' . $rows . 'x' . $cols,
+      'ddo-items-' . $total,
+    ),
+  );
+  $counter = 1;
+  $setted = 0;
   $form['flush_submit'] = array(
     '#type' => 'value',
     '#value' => $flush,
@@ -185,9 +258,6 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
     $_SESSION['ddo_forms:' . $view . ':' . $display]['id'] = $form_build_id;
     $form['#build_id'] = $form_build_id;
   }
-  $counter = 1;
-  $setted = 0;
-  $total = $rows * $cols;
   for ($i = 1; $i <= $total; $i++) {
     if (!empty($_SESSION['ddo_forms:' . $view . ':' . $display]['form_state']['values']['container']['items']['item_' . $i])) {
       $setted++;
@@ -258,6 +328,9 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
   else {
     $show_action = TRUE;
   }
+  if ($total == 0) {
+    $show_action = FALSE;
+  }
 
   if ($show_action) {
     $t = get_t();
@@ -280,11 +353,22 @@ function drag_drop_operations_form($form, &$form_state, $view, $display, $entity
 
 function drag_drop_operations_form_save_draft_js($form, &$form_state) {
 
-  $_SESSION['ddo_forms:' . $form_state['values']['view_name'] . ':' . $form_state['values']['view_display']] = array(
+  $index = 'ddo_forms:' . $form_state['values']['view_name'] . ':' . $form_state['values']['view_display'];
+  $_SESSION[$index] = array(
     'id' => $form['#build_id'],
     'form' => $form,
     'form_state' => $form_state,
   );
+  if (!empty($form_state['values']['container']['box_size'])) {
+    $arr_size = explode('_', $form_state['values']['container']['box_size']);
+    $_SESSION[$index]['rows'] = $arr_size[0];
+    $_SESSION[$index]['cols'] = $arr_size[1];
+    $form = drupal_rebuild_form($form['#form_id'], $form_state, $form);
+  }
+  else {
+    $_SESSION[$index]['rows'] = 0;
+    $_SESSION[$index]['cols'] = 0;
+  }
   return $form['container'];
 
 }
@@ -402,11 +486,13 @@ function drag_drop_operations_process_views_view_grid(&$vars) {
     $result_index = 0;
     foreach ($vars['column_classes'] as $keycol => $col) {
       foreach ($col as $rowindex => $row) {
-        $id = $vars['view']->result[$result_index]->{$entity_id};
-        $classes = 'ddo-draggable ';
-        $classes .= 'ddo-draggable--' . $entity_type . '--' . $id;
-        $vars['column_classes'][$keycol][$rowindex] .= ' ' . $classes;
-        $result_index++;
+        if (isset($vars['view']->result[$result_index])) {
+          $id = $vars['view']->result[$result_index]->{$entity_id};
+          $classes = 'ddo-draggable ';
+          $classes .= 'ddo-draggable--' . $entity_type . '--' . $id;
+          $vars['column_classes'][$keycol][$rowindex] .= ' ' . $classes;
+          $result_index++;
+        }
       }
     }
   }
