@@ -22,6 +22,7 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
     $options['cols'] = array('default' => '1');
     $options['required_size'] = array('default' => '0');
     $options['required_size_form'] = array('default' => 'select');
+    $options['sortable'] = array('default' => 0);
     $options['element_type'] = array('default' => 'select');
     $options['thumb_disp_mode'] = array('default' => 'full');
     $options['requires_full'] = array('default' => 0);
@@ -88,6 +89,16 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       '#required' => TRUE,
       '#default_value' => $this->options['required_size_form'],
     );
+    $form['sortable'] = array(
+      '#type' => 'radios',
+      '#title' => t('Sortable'),
+      '#options' => array(
+        0 => t('No'),
+        1 => t('Yes'),
+      ),
+      '#required' => TRUE,
+      '#default_value' => $this->options['sortable'],
+    );
     $entity_info = entity_get_info($this->view->base_table);
     $entity_modes = $entity_info['view modes'];
     foreach ($entity_modes as $key => $mode) {
@@ -151,8 +162,6 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
         = $this->view->field[$this->options['label_field']]->theme($row);
     }
 
-    // TO-DO: Sortable?
-
     $form = drupal_get_form(
       'drag_drop_operations_form',
       array(
@@ -170,6 +179,7 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
         'flush' => $this->options['flush_submit'],
         'required_size' => $this->options['required_size'],
         'required_size_form' => $this->options['required_size_form'],
+        'sortable' => $this->options['sortable'],
         'redraggable' => $this->view->display_handler->get_option('ddo_draggable'),
       )
     );

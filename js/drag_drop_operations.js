@@ -58,15 +58,55 @@
               hoverClass: 'ddo-hover',
               drop: function(e, ui) {
                 var $element = $(ui.draggable);
-                $placeholder.addClass('ddo-ajax-loading');
-                $that.val($element.attr('data-entitytype') + ':' + $element.attr('data-entityid'));
-                $('#ddo-edit-container-draft').trigger('mousedown');
+                if (!$element.hasClass('ddo-element-sortable')) {
+                  $placeholder.addClass('ddo-ajax-loading');
+                  $that.val($element.attr('data-entitytype') + ':' + $element.attr('data-entityid'));
+                  $('#ddo-edit-container-draft').trigger('mousedown');
+                }
               }
             }
           );
         }
       );
 
+    }
+
+  };
+
+  Drupal.behaviors.dragDropOperationsSort = {
+
+    attach: function(context, settings) {
+      $('.ddo-sort-box:not(.ddo-sort-processed)', context).each(
+        function() {
+          var $this = $(this);
+          $this.addClass('ddo-sort-processed');
+          $this.sortable(
+            {
+              items: '.ddo-element-sortable',
+              placeholder: 'ddo-sort-highlight',
+              stop: function(event, ui) {
+                var $parent = ui.item.parent();
+                var $sortables = $('.ddo-droppable-box', $parent);
+                var $values = {};
+                for ($index in $sortables) {
+                  var $classes = $sortables[$index].className;
+                  if ($classes) {
+                    var $interest = $classes.match(/ddo-droppable-box--(\d+)/g)[0].split('--');
+                    var $box_index = $interest[1] - 1;
+                    $values[$index] = $('.form-type-select:hidden:eq(' + $box_index + ') select', $parent).val();
+                  }
+                }
+                for ($index in $values) {
+                  if (!isNaN($index)) {
+                    $('.form-type-select:hidden:eq(' + $index + ') select', $parent).val($values[$index]);
+                  }
+                }
+                $('#ddo-edit-container-draft').trigger('mousedown');
+              }
+            }
+          );
+        }
+      );
     }
 
   };

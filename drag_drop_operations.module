@@ -152,18 +152,26 @@ function drag_drop_operations_form($form, &$form_state, $options) {
   $full = isset($options['full']) ? $options['full'] : 0;
   $flush = isset($options['flush']) ? $options['flush'] : 1;
   $redraggable = isset($options['redraggable']) ? $options['redraggable'] : 0;
+  $sortable = isset($options['sortable']) ? $options['sortable'] : 0;
 
   $rows = array_filter(explode(',', $rows), 'trim');
   $cols = array_filter(explode(',', $cols), 'trim');
 
   $drop = drupal_get_library('system', 'ui.droppable');
+  $libs = $drop;
+  if ($sortable) {
+    $sort = drupal_get_library('system', 'ui.sortable');
+    $libs['js'] += $sort['js'];
+    $libs['css'] += $sort['css'];
+    $libs['dependencies'] += $sort['dependencies'];
+  }
 
   $form = array();
   $form['#tree'] = TRUE;
   $form['#attached'] = array(
-    'library' => $drop['dependencies'],
-    'js' => $drop['js'],
-    'css' => $drop['css'],
+    'library' => $libs['dependencies'],
+    'js' => $libs['js'],
+    'css' => $libs['css'],
   );
   $form['#attached']['js'][] = drupal_get_path('module', 'drag_drop_operations') . '/js/drag_drop_operations.js';
   $form['#attached']['css'][] = drupal_get_path('module', 'drag_drop_operations') . '/css/drag_drop_operations.css';
@@ -210,7 +218,7 @@ function drag_drop_operations_form($form, &$form_state, $options) {
     }
     $size_options = array();
     if ($first_step) {
-      $size_options['0_0'] = t('- Select an option - ');
+      $size_options['0_0'] = t('- Select an option -');
     }
     $first_set = FALSE;
     foreach ($array_rows as $index => $row) {
@@ -238,11 +246,14 @@ function drag_drop_operations_form($form, &$form_state, $options) {
   }
   $total = $rows * $cols;
   $form['container']['#attributes'] = array(
-    'classes' => array(
+    'class' => array(
       'ddo-grid-' . $rows . 'x' . $cols,
       'ddo-items-' . $total,
     ),
   );
+  if ($sortable) {
+    $form['container']['#attributes']['class'][] = 'ddo-sort-box';
+  }
   $counter = 1;
   $setted = 0;
   $form['flush_submit'] = array(
@@ -283,7 +294,7 @@ function drag_drop_operations_form($form, &$form_state, $options) {
       $form['container']['items']['val_' . $i] = array(
         '#type' => 'markup',
         '#markup' =>
-          '<div class="ddo-droppable-box">
+          '<div class="ddo-droppable-box ddo-droppable-box--' . $i . ($sortable ? ' ddo-element-sortable' : '') . '">
             <div class="ddo-draggable-set' . ($redraggable ? ' ddo-draggable ddo-draggable--' . $base[0] . '--' . $base[1] : '') . '">
               <a href="#" class="ddo-remove-item">' . t('Remove') . '</a>
               ' . render(entity_view($base[0], $ent_ent, $view_mode)) . '
@@ -294,7 +305,7 @@ function drag_drop_operations_form($form, &$form_state, $options) {
     else {
       $form['container']['items']['val_' . $i] = array(
         '#type' => 'markup',
-        '#markup' => '<div class="ddo-droppable-box"></div>',
+        '#markup' => '<div class="ddo-droppable-box ddo-droppable-box--' . $i . ($sortable ? ' ddo-element-sortable' : '') . '"></div>',
       );
     }
     if ($counter == $cols) {
