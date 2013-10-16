@@ -230,7 +230,7 @@ function drag_drop_operations_form($form, &$form_state, $options) {
     $form['container']['box_size'] = array(
       '#type' => $required_size_form,
       '#options' => $size_options,
-      '#default_value' => isset($size_options[$rows . '_' . $cols]) ? $size_options[$rows . '_' . $cols] : $first_set,
+      '#default_value' => isset($size_options[$rows . '_' . $cols]) ? ($rows . '_' . $cols) : $first_set,
       '#options' => $size_options,
       '#title' => t('Size'),
       '#ajax' => array(
