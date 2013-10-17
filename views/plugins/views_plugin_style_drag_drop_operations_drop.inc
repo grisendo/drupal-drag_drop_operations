@@ -20,6 +20,7 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
     $options['label_field'] = array('default' => '');
     $options['rows'] = array('default' => '1');
     $options['cols'] = array('default' => '1');
+    $options['labels'] = array('default' => '');
     $options['required_size'] = array('default' => '0');
     $options['required_size_form'] = array('default' => 'select');
     $options['sortable'] = array('default' => 0);
@@ -68,6 +69,11 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
       '#title' => t('Number of cols'),
       '#required' => TRUE,
       '#default_value' => $this->options['cols'],
+    );
+    $form['labels'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Labels'),
+      '#default_value' => $this->options['labels'],
     );
     $form['required_size'] = array(
       '#type' => 'radios',
@@ -171,6 +177,7 @@ class views_plugin_style_drag_drop_operations_drop extends views_plugin_style {
         'op' => $this->options['operation'],
         'rows' => $this->options['rows'],
         'cols' => $this->options['cols'],
+        'labels' => $this->options['labels'],
         'allowed_values' => $allowed_values,
         'element_type' => $this->options['element_type'],
         'op_label' => $this->options['op_label'],

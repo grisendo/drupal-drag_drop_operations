@@ -143,6 +143,7 @@ function drag_drop_operations_form($form, &$form_state, $options) {
   $op = $options['op'];
   $rows = isset($options['rows']) ? $options['rows'] : 1;
   $cols = isset($options['cols']) ? $options['cols'] : 1;
+  $labels = isset($options['labels']) ? $options['labels'] : '';
   $required_size = isset($options['required_size']) ? $options['required_size'] : 0;
   $required_size_form = $options['required_size_form'];
   $allowed_values = isset($options['allowed_values']) ? $options['allowed_values'] : array();
@@ -220,11 +221,17 @@ function drag_drop_operations_form($form, &$form_state, $options) {
     if ($first_step) {
       $size_options['0_0'] = t('- Select an option -');
     }
+    $labels_array = explode(';', $labels);
     $first_set = FALSE;
     foreach ($array_rows as $index => $row) {
-      $size_options[$row . '_' . $array_cols[$index]] = $row . 'x' . $array_cols[$index];
+      if (isset($labels_array[$index])) {
+        $size_options[$row . '_' . $array_cols[$index]] = t($labels_array[$index]);
+      }
+      else {
+        $size_options[$row . '_' . $array_cols[$index]] = $row . 'x' . $array_cols[$index];
+      }
       if (!$first_set) {
-        $first_set = $size_options[$row . '_' . $array_cols[$index]];
+        $first_set = $row . '_' . $array_cols[$index];
       }
     }
     $form['container']['box_size'] = array(
